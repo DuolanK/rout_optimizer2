@@ -1,12 +1,12 @@
 import math
 
-# Класс на плоскости
+# Класс представления точки на плоскости
 class Point:
     def __init__(self, x, y):
         self.x = x
         self.y = y
 
-# Класс заказа
+# Класс  заказа
 class Order:
     def __init__(self, order_id, from_point, to_point, price):
         self.order_id = order_id
@@ -32,13 +32,11 @@ class DeliveryService:
         self.couriers = [Courier(courier_id, Point(coordinates[0], coordinates[1]))
                          for courier_id, coordinates in couriers.items()]
 
-        # Дебаг для проверки количества заказов и курьеров
+        # Добавление дебага для проверки количества заказов и курьеров
         if len(self.orders) < len(self.couriers):
             print("DEBUG: There are more couriers than orders.")
-
         elif len(self.orders) > len(self.couriers):
             print("DEBUG: There are more orders than couriers.")
-
 
     # Метод для вычисления расстояния между двумя точками
     def calculate_distance(self, point1, point2):
@@ -53,10 +51,9 @@ class DeliveryService:
             distances = []
 
             # Цикл по каждому заказу
-            for order_list in self.orders:
-                for order in order_list:
-                    distance = self.calculate_distance(courier.coordinates, order.from_point)
-                    distances.append((order.order_id, distance))
+            for order in self.orders:
+                distance = self.calculate_distance(courier.coordinates, order.from_point)
+                distances.append((order.order_id, distance))
 
             # Сортировка расстояний от курьера до заказов по возрастанию
             distances.sort(key=lambda x: x[1])
@@ -68,8 +65,7 @@ class DeliveryService:
                 assigned_orders.append((order_id, distance))
                 if len(assigned_orders) == 1:
                     # Убираем уже назначенный заказ из списка заказов
-                    for order_list in self.orders:
-                        self.orders[self.orders.index(order_list)] = [order for order in order_list if order.order_id != order_id]
+                    self.orders = [order for order in self.orders if order.order_id != order_id]
                     break
 
             courier_order_distances.append((courier.courier_id, assigned_orders))
@@ -79,16 +75,13 @@ class DeliveryService:
 
         return courier_order_distances
 
-
-
 # Листы:
 orders_data = {
     'Order1': {'from': (56.7500, 37.6200), 'to': (56.7150, 37.6250), 'price': 10},
     'Order2': {'from': (55.7412, 37.6156), 'to': (56.7150, 37.6250), 'price': 10},
     'Order3': {'from': (55.7522, 37.6221), 'to': (56.7150, 37.6250), 'price': 10},
     'Order4': {'from': (55.7450, 37.6180), 'to': (56.7150, 37.6250), 'price': 10},
-    'Order5': {'from': (55.7450, 37.6180), 'to': (56.7150, 37.6250), 'price': 10},
-    'Order6': {'from': (55.7450, 37.6180), 'to': (56.7150, 37.6250), 'price': 10}
+    'Order5': {'from': (55.7450, 37.6180), 'to': (56.7150, 37.6250), 'price': 10}
 }
 
 couriers_data = {
@@ -111,6 +104,5 @@ for courier_id, assigned_orders in courier_order_distances:
 
 # Вывод не назначенных заказов
 print("Unassigned Orders:")
-for order_list in delivery_service.orders:
-    for order in order_list:
-        print(f"  Order {order.order_id}")
+for order in delivery_service.orders:
+    print(f"  Order {order.order_id}")
