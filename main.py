@@ -32,11 +32,6 @@ class DeliveryService:
         self.couriers = [Courier(courier_id, Point(coordinates[0], coordinates[1]))
                          for courier_id, coordinates in couriers.items()]
 
-        # Добавление дебага для проверки количества заказов и курьеров
-        if len(self.orders) < len(self.couriers):
-            print("DEBUG: There are more couriers than orders.")
-        elif len(self.orders) > len(self.couriers):
-            print("DEBUG: There are more orders than couriers.")
 
     # Метод для вычисления расстояния между двумя точками
     def calculate_distance(self, point1, point2):
@@ -75,6 +70,36 @@ class DeliveryService:
 
         return courier_order_distances
 
+    def find_courier(self):
+        courier_order_distances = []
+
+        # Loop through each courier
+        for courier in self.couriers:
+            distances = []
+
+            # Loop through each order
+            for order in self.orders:
+                distance = self.calculate_distance(courier.coordinates, order.from_point)
+                distances.append((order.order_id, distance))
+
+            # Sort distances from courier to orders in ascending order
+            distances.sort(key=lambda x: x[1])
+
+            assigned_orders = []
+
+            # Choose one order with the minimum distance for each courier
+            for order_id, distance in distances:
+                assigned_orders.append((order_id, distance))
+                self.orders = [order for order in self.orders if order.order_id != order_id]
+                break  # Stop the loop after assigning one order
+
+            courier_order_distances.append((courier.courier_id, assigned_orders))
+
+        # Sort couriers by the minimum distance to the first assigned order
+        courier_order_distances.sort(key=lambda x: x[1][0][1] if x[1] else float('inf'))
+
+        return courier_order_distances
+
 # Листы:
 orders_data = {
     'Order1': {'from': (56.7500, 37.6200), 'to': (56.7150, 37.6250), 'price': 10},
@@ -93,8 +118,28 @@ couriers_data = {
 
 # Создание объекта DeliveryService
 delivery_service = DeliveryService(orders_data, couriers_data)
-# Получение расстояний между курьерами и заказами
-courier_order_distances = delivery_service.find_courier_order_distances()
+
+
+if len(delivery_service.orders) == len(delivery_service.couriers):
+    courier_order_distances = delivery_service.find_courier_order_distances()
+
+elif len(delivery_service.orders) < len(delivery_service.couriers):
+    courier_order_distances = delivery_service.find_courier()
+
+elif len(delivery_service.orders) > len(delivery_service.couriers):
+    courier_order_distances = delivery_service.find_courier_order_distances()
+    # Перебираем не назначенные заказы
+    for order in delivery_service.orders:
+        # Находим курьера с минимальным расстоянием до текущего заказа
+        min_distance_courier = min(delivery_service.couriers,
+                                   key=lambda c: delivery_service.calculate_distance(c.coordinates, order.from_point))
+
+        # Назначаем заказ этому курьеру
+        courier_order_distances.append((min_distance_courier.courier_id, [
+            (order.order_id, delivery_service.calculate_distance(min_distance_courier.coordinates, order.from_point))]))
+
+        # Убираем уже назначенный заказ из списка заказов
+        delivery_service.orders = [o for o in delivery_service.orders if o.order_id != order.order_id]
 
 # Вывод результата
 for courier_id, assigned_orders in courier_order_distances:
