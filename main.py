@@ -71,7 +71,7 @@ class DeliveryService:
             courier_order_distances.append((courier.courier_id, assigned_orders))
 
         # Сортировка курьеров по минимальному пути к первому заказу
-        courier_order_distances.sort(key=lambda x: x[1][0][1])
+        courier_order_distances.sort(key=lambda x: x[1][0][1] if x[1] else float('inf'))
 
         return courier_order_distances
 
