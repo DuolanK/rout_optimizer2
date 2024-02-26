@@ -19,8 +19,9 @@ class Courier:
     def __init__(self, courier_id, coordinates):
         self.courier_id = courier_id
         self.coordinates = coordinates
+        self.count = 0
 
-# Класс сервиса
+    # Класс сервиса
 class DeliveryService:
     def __init__(self, orders, couriers):
         # Преобразование данных о заказах в объекты класса Order
@@ -106,7 +107,10 @@ orders_data = {
     'Order2': {'from': (55.7412, 37.6156), 'to': (56.7150, 37.6250), 'price': 10},
     'Order3': {'from': (55.7522, 37.6221), 'to': (56.7150, 37.6250), 'price': 10},
     'Order4': {'from': (55.7450, 37.6180), 'to': (56.7150, 37.6250), 'price': 10},
-    'Order5': {'from': (55.7450, 37.6180), 'to': (56.7150, 37.6250), 'price': 10}
+    'Order5': {'from': (55.7412, 37.6156), 'to': (56.7150, 37.6250), 'price': 10},
+    'Order6': {'from': (55.7522, 37.6221), 'to': (56.7150, 37.6250), 'price': 10},
+    'Order7': {'from': (55.7450, 37.6180), 'to': (56.7150, 37.6250), 'price': 10},
+    'Order8': {'from': (55.7450, 37.6180), 'to': (56.7150, 37.6250), 'price': 10}
 }
 
 couriers_data = {
@@ -127,23 +131,22 @@ elif len(delivery_service.orders) < len(delivery_service.couriers):
     courier_order_distances = delivery_service.find_courier()
 
 elif len(delivery_service.orders) > len(delivery_service.couriers):
-    courier_order_distances = delivery_service.find_courier_order_distances()
+    courier_order_distances = []  # Define the variable here
     # Перебираем не назначенные заказы
     for order in delivery_service.orders:
-        # Находим курьера с минимальным расстоянием до текущего заказа
-        min_distance_courier = min(delivery_service.couriers,
-                                   key=lambda c: delivery_service.calculate_distance(c.coordinates, order.from_point))
+        # Находим курьера с минимальным счетчиком
+        min_count_courier = min(delivery_service.couriers, key=lambda c: c.count)
 
-        # Назначаем заказ этому курьеру
-        courier_order_distances.append((min_distance_courier.courier_id, [
-            (order.order_id, delivery_service.calculate_distance(min_distance_courier.coordinates, order.from_point))]))
+        # Назначаем заказ этому курьеру и увеличиваем его счетчик
+        courier_order_distances.append((min_count_courier.courier_id, [(order.order_id, delivery_service.calculate_distance(min_count_courier.coordinates, order.from_point))]))
+        min_count_courier.count += 1
 
         # Убираем уже назначенный заказ из списка заказов
         delivery_service.orders = [o for o in delivery_service.orders if o.order_id != order.order_id]
 
 # Вывод результата
 for courier_id, assigned_orders in courier_order_distances:
-    print(f"Courier {courier_id}:")
+    print(f"Courier {courier_id} (Count: {next(c.count for c in delivery_service.couriers if c.courier_id == courier_id)}):")
     for order_id, distance in assigned_orders:
         print(f"  Order {order_id}: {distance:.4f} units")
 
