@@ -138,11 +138,17 @@ elif len(delivery_service.orders) > len(delivery_service.couriers):
         min_count_courier = min(delivery_service.couriers, key=lambda c: c.count)
 
         # Назначаем заказ этому курьеру и увеличиваем его счетчик
-        courier_order_distances.append((min_count_courier.courier_id, [(order.order_id, delivery_service.calculate_distance(min_count_courier.coordinates, order.from_point))]))
+        assigned_orders = [
+            (order.order_id, delivery_service.calculate_distance(min_count_courier.coordinates, order.from_point))]
         min_count_courier.count += 1
+
+        # Обновляем координаты курьера на координаты конечной точки заказа
+        min_count_courier.coordinates = order.to_point
 
         # Убираем уже назначенный заказ из списка заказов
         delivery_service.orders = [o for o in delivery_service.orders if o.order_id != order.order_id]
+
+        courier_order_distances.append((min_count_courier.courier_id, assigned_orders))
 
 # Вывод результата
 for courier_id, assigned_orders in courier_order_distances:
