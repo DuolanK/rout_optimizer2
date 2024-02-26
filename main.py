@@ -82,7 +82,12 @@ orders_data = {
     'Order3': {'from': (55.7522, 37.6221), 'to': (56.7150, 37.6250), 'price': 10},
     'Order4': {'from': (55.7450, 37.6180), 'to': (56.7150, 37.6250), 'price': 10},
     'Order5': {'from': (55.7450, 37.6180), 'to': (56.7150, 37.6250), 'price': 10},
-    'Order6': {'from': (55.7450, 37.6180), 'to': (56.7150, 37.6250), 'price': 10}
+    'Order6': {'from': (56.7500, 37.6200), 'to': (56.7150, 37.6250), 'price': 10},
+    'Order7': {'from': (55.7412, 37.6156), 'to': (56.7150, 37.6250), 'price': 10},
+    'Order8': {'from': (55.7522, 37.6221), 'to': (56.7150, 37.6250), 'price': 10},
+    'Order9': {'from': (55.7450, 37.6180), 'to': (56.7150, 37.6250), 'price': 10},
+    'Order10': {'from': (55.7450, 37.6180), 'to': (56.7150, 37.6250), 'price': 10},
+    'Order11': {'from': (55.7450, 37.6180), 'to': (56.7150, 37.6250), 'price': 10}
 }
 
 couriers_data = {
@@ -94,15 +99,25 @@ couriers_data = {
 
 # Создание объекта DeliveryService
 delivery_service = DeliveryService(orders_data, couriers_data)
-# Получение расстояний между курьерами и заказами
-courier_order_distances = delivery_service.find_courier_order_distances()
 
-# Вывод результата
-for courier_id, assigned_orders in courier_order_distances:
-    print(f"Courier {courier_id}:")
-    for order_id, distance in assigned_orders:
-        print(f"  Order {order_id}: {distance:.4f} units")
-# Вывод не назначенных заказов
-print("Unassigned Orders:")
-for order in delivery_service.orders:
-    print(f"  Order {order.order_id}")
+# Получение расстояний между курьерами и заказами
+while delivery_service.orders:  # Продолжать, пока есть неназначенные заказы
+    courier_order_distances = delivery_service.find_courier_order_distances()
+
+    # Вывод результата
+    for courier_id, assigned_orders in courier_order_distances:
+        print(f"Courier {courier_id}:")
+        for order_id, distance in assigned_orders:
+            print(f"  Order {order_id}: {distance:.4f} units")
+
+    # Вывод не назначенных заказов
+    print("Unassigned Orders:")
+    for order in delivery_service.orders:
+        print(f"  Order {order.order_id}")
+
+    # Обновление объекта DeliveryService с текущим списком неназначенных заказов
+    delivery_service = DeliveryService({f'Order{i+1}': {'from': (order.from_point.x, order.from_point.y),
+                                                        'to': (order.to_point.x, order.to_point.y),
+                                                        'price': order.price}
+                                        for i, order in enumerate(delivery_service.orders)},
+                                       couriers_data)
