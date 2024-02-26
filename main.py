@@ -35,12 +35,10 @@ class DeliveryService:
         # Дебаг для проверки количества заказов и курьеров
         if len(self.orders) < len(self.couriers):
             print("DEBUG: There are more couriers than orders.")
-            # Обрезаем список курьеров по количеству заказов
-            self.couriers = self.couriers[:len(self.orders)]
+
         elif len(self.orders) > len(self.couriers):
             print("DEBUG: There are more orders than couriers.")
-            # Разбиваем список заказов на части по количеству курьеров
-            self.split_orders()
+
 
     # Метод для вычисления расстояния между двумя точками
     def calculate_distance(self, point1, point2):
@@ -81,21 +79,7 @@ class DeliveryService:
 
         return courier_order_distances
 
-    # Метод для разбиения списка заказов на части по количеству курьеров
-    def split_orders(self):
-        num_orders = len(self.orders)
-        chunk_size = len(self.couriers)
-        remainder = len(self.orders) % len(self.couriers)
 
-        new_orders = []
-        start_index = 0
-
-        for i in range(len(self.couriers)):
-            end_index = start_index + chunk_size + (1 if i < remainder else 0)
-            new_orders.append(self.orders[start_index:end_index])
-            start_index = end_index
-
-        self.orders = new_orders
 
 # Листы:
 orders_data = {
