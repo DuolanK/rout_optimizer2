@@ -1,12 +1,12 @@
 import math
 
-# Класс для представления точки на плоскости
+# Класс на плоскости
 class Point:
     def __init__(self, x, y):
         self.x = x
         self.y = y
 
-# Класс для представления заказа
+# Класс заказа
 class Order:
     def __init__(self, order_id, from_point, to_point, price):
         self.order_id = order_id
@@ -14,13 +14,13 @@ class Order:
         self.to_point = to_point
         self.price = price
 
-# Класс для представления курьера
+# Класс  курьера
 class Courier:
     def __init__(self, courier_id, coordinates):
         self.courier_id = courier_id
         self.coordinates = coordinates
 
-# Класс, представляющий службу доставки
+# Класс сервиса
 class DeliveryService:
     def __init__(self, orders, couriers):
         # Преобразование данных о заказах в объекты класса Order
