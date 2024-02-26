@@ -42,36 +42,39 @@ class DeliveryService:
     def calculate_distance(self, point1, point2):
         return math.sqrt((point2.x - point1.x)**2 + (point2.y - point1.y)**2)
 
-    # Метод для нахождения расстояний между курьерами и заказами
     def find_courier_order_distances(self):
         courier_order_distances = []
+        assigned_couriers = set()
 
-        # Цикл по каждому курьеру
-        for courier in self.couriers:
+        # Цикл по каждому заказу
+        for order in self.orders:
             distances = []
 
-            # Цикл по каждому заказу
-            for order in self.orders:
+            # Цикл по каждому курьеру, исключая уже назначенных
+            for courier in [c for c in self.couriers if c.courier_id not in assigned_couriers]:
                 distance = self.calculate_distance(courier.coordinates, order.from_point)
-                distances.append((order.order_id, distance))
+                distances.append((courier.courier_id, order.order_id, distance))
 
-            # Сортировка расстояний от курьера до заказов по возрастанию
-            distances.sort(key=lambda x: x[1])
+            if not distances:
+                # Если нет доступных курьеров, прерываем цикл
+                break
 
-            assigned_orders = []
+            # Сортировка расстояний от курьеров до текущего заказа по возрастанию
+            distances.sort(key=lambda x: x[2])
 
-            # Выбор одного заказа с минимальным расстоянием для каждого курьера
-            for order_id, distance in distances:
-                assigned_orders.append((order_id, distance))
-                if len(assigned_orders) == 1:
-                    # Убираем уже назначенный заказ из списка заказов
-                    self.orders = [order for order in self.orders if order.order_id != order_id]
-                    break
+            # Выбор первого курьера с минимальным расстоянием для текущего заказа
+            courier_id, assigned_order_id, min_distance = distances[0]
 
-            courier_order_distances.append((courier.courier_id, assigned_orders))
+            # Убираем уже назначенного курьера из списка доступных
+            assigned_couriers.add(courier_id)
+
+            # Убираем уже назначенный заказ из списка заказов
+            self.orders = [o for o in self.orders if o.order_id != assigned_order_id]
+
+            courier_order_distances.append((courier_id, assigned_order_id, min_distance))
 
         # Сортировка курьеров по минимальному пути к первому заказу
-        courier_order_distances.sort(key=lambda x: x[1][0][1])
+        courier_order_distances.sort(key=lambda x: x[2])
 
         return courier_order_distances
 
@@ -97,10 +100,9 @@ delivery_service = DeliveryService(orders_data, couriers_data)
 courier_order_distances = delivery_service.find_courier_order_distances()
 
 # Вывод результата
-for courier_id, assigned_orders in courier_order_distances:
+for courier_id, assigned_order_id, distance in courier_order_distances:
     print(f"Courier {courier_id}:")
-    for order_id, distance in assigned_orders:
-        print(f"  Order {order_id}: {distance:.4f} units")
+    print(f"  Order {assigned_order_id}: {distance:.4f} units")
 
 # Вывод не назначенных заказов
 print("Unassigned Orders:")
